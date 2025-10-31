@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Gemini Icon Pack Generator",
+  "description": "Generate unique icon designs for your Android device, specifically tailored for Microsoft Launcher, using the power of Gemini's image generation capabilities. Customize style, shape, and color to create your perfect icon pack.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
