@@ -1,3 +1,5 @@
+
+
 import React from 'react';
 import { GeneratedIcon } from '../types';
 
@@ -49,7 +51,7 @@ const EditImageModal: React.FC<EditImageModalProps> = ({
             alt={`Editing: ${icon.prompt}`}
             className="w-32 h-32 object-contain border border-gray-300 p-2 rounded-xl shadow-sm mb-4"
           />
-          <p className="text-sm text-gray-600 text-center line-clamp-2" aria-live="polite">
+          <p className="text-sm text-gray-600 text-center line-clamp-2">
             Original prompt: {icon.prompt}
           </p>
         </div>

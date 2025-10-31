@@ -6,6 +6,7 @@ import IconGallery from './components/IconGallery';
 import EditImageModal from './components/EditImageModal'; // New import
 import { ensureApiKeySelected, generateIconImage, editIconImage, generateIconPack } from './services/geminiService'; // New imports
 import { GeneratedIcon, IconStyle, IconShape } from './types';
+import { ApiKeyError } from './errors'; // Import custom error
 
 function App() {
   const [generatedIcons, setGeneratedIcons] = useState<GeneratedIcon[]>([]);
@@ -73,11 +74,11 @@ function App() {
         setError("No image URL received from the API.");
       }
     } catch (e: any) {
-      setError(`Generation failed: ${e.message || 'Unknown error'}`);
-      // If the error suggests an API key issue, reset apiKeyReady to prompt re-selection
-      if (e.message && e.message.includes("API Key might be invalid.")) {
-        setApiKeyReady(false);
-        setError("API Key might be invalid or expired. Please re-select your API key.");
+      if (e instanceof ApiKeyError) {
+        setError("API Key Issue: Please select or re-select your Gemini API key.");
+        setApiKeyReady(false); // Reset to prompt API key selection
+      } else {
+        setError(`Generation failed: ${e.message || 'Unknown error'}`);
       }
     } finally {
       setIsLoading(false);
@@ -119,11 +120,11 @@ function App() {
       ]);
       handleCloseEditModal(); // Close modal on success
     } catch (e: any) {
-      setEditingError(`Editing failed: ${e.message || 'Unknown error'}`);
-      // If the error suggests an API key issue, reset apiKeyReady to prompt re-selection
-      if (e.message && e.message.includes("API Key might be invalid.")) {
-        setApiKeyReady(false);
-        setError("API Key might be invalid or expired. Please re-select your API key.");
+      if (e instanceof ApiKeyError) {
+        setEditingError("API Key Issue: Please select or re-select your Gemini API key.");
+        setApiKeyReady(false); // Reset to prompt API key selection
+      } else {
+        setEditingError(`Editing failed: ${e.message || 'Unknown error'}`);
       }
     } finally {
       setIsEditingLoading(false);
@@ -147,11 +148,11 @@ function App() {
         setPackError("No icons were generated for the pack.");
       }
     } catch (e: any) {
-      setPackError(`Icon pack generation failed: ${e.message || 'Unknown error'}`);
-      // If the error suggests an API key issue, reset apiKeyReady to prompt re-selection
-      if (e.message && e.message.includes("API Key might be invalid.")) {
-        setApiKeyReady(false);
-        setError("API Key might be invalid or expired. Please re-select your API key.");
+      if (e instanceof ApiKeyError) {
+        setPackError("API Key Issue: Please select or re-select your Gemini API key.");
+        setApiKeyReady(false); // Reset to prompt API key selection
+      } else {
+        setPackError(`Icon pack generation failed: ${e.message || 'Unknown error'}`);
       }
     } finally {
       setIsPackLoading(false);

@@ -1,6 +1,7 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import { IconStyle, IconShape, GeneratedIcon } from "../types";
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for generating unique IDs
+import { ApiKeyError } from "../errors"; // Import custom error
 
 // The `window.aistudio` object is assumed to be globally available and typed
 // by the execution environment. Explicit declaration here caused a conflict.
@@ -73,7 +74,8 @@ export const generateIconImage = async (
       console.error("API Key error: Requested entity was not found. Prompting for key selection again.");
       // Safely access window.aistudio after checking its existence and type
       if (typeof window !== 'undefined' && window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
-        await window.aistudio.openSelectKey(); // Prompt user to re-select API key
+        // We throw the error for App.tsx to handle re-prompting API key selection
+        throw new ApiKeyError(`Failed to generate icon: API Key might be invalid or expired. Please re-select.`);
       }
       throw new Error(`Failed to generate icon: API Key might be invalid. Please re-select. ${error.message}`);
     }
@@ -129,7 +131,8 @@ export const editIconImage = async (
     if (error.message && error.message.includes("Requested entity was not found.")) {
       console.error("API Key error during image edit: Requested entity was not found. Prompting for key selection again.");
       if (typeof window !== 'undefined' && window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
-        await window.aistudio.openSelectKey();
+        // We throw the error for App.tsx to handle re-prompting API key selection
+        throw new ApiKeyError(`Failed to edit icon: API Key might be invalid or expired. Please re-select.`);
       }
       throw new Error(`Failed to edit icon: API Key might be invalid. Please re-select. ${error.message}`);
     }
@@ -192,12 +195,13 @@ export const generateIconPack = async (
       if (error.message && error.message.includes("Requested entity was not found.")) {
         console.error("API Key error during pack generation: Requested entity was not found. Prompting for key selection again.");
         if (typeof window !== 'undefined' && window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
-          await window.aistudio.openSelectKey();
+          // We throw the error for App.tsx to handle re-prompting API key selection
+          throw new ApiKeyError(`Failed to generate icon pack: API Key might be invalid or expired. Please re-select.`);
         }
         throw new Error(`Failed to generate icon pack: API Key issue. ${error.message}`);
       }
       console.error(`Error generating icon for ${appName} in pack:`, error);
-      // Continue to next app even if one fails
+      // Continue to next app even if one fails - though throwing ApiKeyError will stop the loop
     }
   }
   return generatedIcons;
