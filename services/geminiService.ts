@@ -22,6 +22,19 @@ async function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
+const getApiKey = (): string => {
+  const viteKey = import.meta.env?.VITE_API_KEY ?? import.meta.env?.VITE_GEMINI_API_KEY;
+  if (viteKey) {
+    return viteKey;
+  }
+
+  if (typeof process !== "undefined" && process.env?.API_KEY) {
+    return process.env.API_KEY;
+  }
+
+  throw new ApiKeyError("Gemini API key is not configured. Please set VITE_API_KEY or select a key in Google AI Studio.");
+};
+
 export const ensureApiKeySelected = async (): Promise<boolean> => {
   // Check if window.aistudio exists and has the expected methods
   if (typeof window === 'undefined' || !window.aistudio || typeof window.aistudio.hasSelectedApiKey !== 'function' || typeof window.aistudio.openSelectKey !== 'function') {
@@ -49,7 +62,7 @@ export const generateIconImage = async (
 
   try {
     // Re-initialize GoogleGenAI right before the API call to ensure the latest API key is used
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     
     const response = await ai.models.generateImages({
       model: 'imagen-4.0-generate-001', // High-quality image generation model
@@ -70,6 +83,9 @@ export const generateIconImage = async (
       throw new Error("No images were generated.");
     }
   } catch (error: any) {
+    if (error instanceof ApiKeyError) {
+      throw error;
+    }
     if (error.message && error.message.includes("Requested entity was not found.")) {
       console.error("API Key error: Requested entity was not found. Prompting for key selection again.");
       // Safely access window.aistudio after checking its existence and type
@@ -97,7 +113,7 @@ export const editIconImage = async (
   editingPrompt: string,
 ): Promise<string> => {
   // Re-initialize GoogleGenAI for latest API key
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
 
   try {
     const response = await ai.models.generateContent({
@@ -128,6 +144,9 @@ export const editIconImage = async (
       throw new Error("No edited image received from the API.");
     }
   } catch (error: any) {
+    if (error instanceof ApiKeyError) {
+      throw error;
+    }
     if (error.message && error.message.includes("Requested entity was not found.")) {
       console.error("API Key error during image edit: Requested entity was not found. Prompting for key selection again.");
       if (typeof window !== 'undefined' && window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
@@ -162,7 +181,7 @@ export const generateIconPack = async (
   color: string,
 ): Promise<GeneratedIcon[]> => {
   const generatedIcons: GeneratedIcon[] = [];
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
 
   for (const appName of commonApps) {
     const fullPrompt = `Create a ${style} ${color} ${shape} app icon for a "${appName}" application. The icon should be visually appealing, isolated on a plain white or transparent background, with crisp edges, and suitable for an Android icon pack. Incorporate the overall pack theme: "${themePrompt}".`;
@@ -192,6 +211,9 @@ export const generateIconPack = async (
         console.warn(`No image generated for ${appName} in the pack.`);
       }
     } catch (error: any) {
+      if (error instanceof ApiKeyError) {
+        throw error;
+      }
       if (error.message && error.message.includes("Requested entity was not found.")) {
         console.error("API Key error during pack generation: Requested entity was not found. Prompting for key selection again.");
         if (typeof window !== 'undefined' && window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
