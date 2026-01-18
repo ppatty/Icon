@@ -4,6 +4,7 @@ import IconGeneratorForm from './components/IconGeneratorForm';
 import IconPackGeneratorForm from './components/IconPackGeneratorForm'; // New import
 import IconGallery from './components/IconGallery';
 import EditImageModal from './components/EditImageModal'; // New import
+import RosterBrief from './components/RosterBrief';
 import { ensureApiKeySelected, generateIconImage, editIconImage, generateIconPack } from './services/geminiService'; // New imports
 import { GeneratedIcon, IconStyle, IconShape } from './types';
 import { ApiKeyError } from './errors'; // Import custom error
@@ -164,10 +165,10 @@ function App() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-indigo-50 to-purple-100">
       <header className="text-center mb-8">
         <h1 className="text-4xl sm:text-5xl font-extrabold text-indigo-800 tracking-tight leading-tight">
-          Gemini Icon Pack Generator
+          Training Roster Planner
         </h1>
         <p className="mt-3 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-          Unleash your creativity and design custom app icons for your Android device with AI.
+          Coordinate onboarding rotations, shift coverage, and follow-on roster assignments for the January intake.
         </p>
       </header>
 
@@ -203,6 +204,7 @@ function App() {
 
       {apiKeyReady && (
         <>
+          <RosterBrief />
           <IconGeneratorForm onGenerate={handleGenerate} isLoading={isLoading} error={error} />
           <IconPackGeneratorForm onGeneratePack={handleGeneratePack} isLoading={isPackLoading} error={packError} /> {/* New Pack Generator Form */}
           <IconGallery icons={generatedIcons} onEdit={handleEditClick} />
@@ -219,7 +221,7 @@ function App() {
       )}
 
       <footer className="mt-12 text-center text-gray-500 text-sm">
-        <p>Powered by Gemini API & Tailwind CSS</p>
+        <p>Drafted for the January 27 onboarding cohort.</p>
       </footer>
     </div>
   );
